@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:id="@+id/app_toolbar">
+            android:id="@+id/app_request_up_toolbar">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -75,7 +75,7 @@
                 android:text="입양자 이름"
                 android:textColor="#FFFFFF"
                 android:textSize="18dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
             <EditText
                 android:id="@+id/username"
@@ -90,33 +90,51 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="350dp"
             android:layout_marginTop="20dp"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="130dp"
+            <LinearLayout
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:background="@color/colorPrimary"
-                android:gravity="center"
-                android:text="강아지 사진"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="130dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@color/colorPrimary"
+                    android:gravity="center"
+                    android:text="강아지 사진"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="40dp"
+                    android:background="#BDBDBD"/>
+
+                <ImageView
+                    android:id="@+id/p_menu"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@color/colorPrimary"
+                    android:src ="@drawable/ic_more_vert_black_24dp"/>
+
+
+            </LinearLayout>
+
 
             <ImageView
                 android:id="@+id/pet"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="20dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginRight="20dp"
                 android:gravity="center_vertical"
-                android:src ="@drawable/ic_camera_alt_black_24dp"/>
-
-
-
+                android:src ="@drawable/ic_camera_alt_black_24dp" />
 
         </LinearLayout>
 

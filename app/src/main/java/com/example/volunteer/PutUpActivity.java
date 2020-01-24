@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -37,6 +39,12 @@ public class PutUpActivity extends AppCompatActivity {
     private Spinner daysSpinner;
     private static final String TAG = "PutUpActivity";
     private  FirebaseUser user;
+    private String name;
+    private String memo;
+    private String airport;
+    private String year;
+    private String month;
+    private String day;
 
     ArrayList<String> items = new ArrayList<>();
     ArrayList<String> years = new ArrayList<>();
@@ -56,7 +64,7 @@ public class PutUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_put_up);
 
-        Toolbar tb = (Toolbar) findViewById(R.id.app_toolbar) ;
+        Toolbar tb = (Toolbar) findViewById(R.id.put_up_toolbar) ;
         setSupportActionBar(tb);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -132,17 +140,19 @@ public class PutUpActivity extends AppCompatActivity {
 
 
     private void putUp() {
-        final String name = ((EditText) findViewById(R.id.username)).getText().toString();
-        final String memo = ((EditText) findViewById(R.id.memo)).getText().toString();
-        String airport = (String)airSpinner.getSelectedItem();
-        String year = (String)yearsSpinner.getSelectedItem();
-        String month = (String)monthsSpinner.getSelectedItem();
-        String day = (String)daysSpinner.getSelectedItem();
+         name = ((EditText) findViewById(R.id.username)).getText().toString();
+         memo = ((EditText) findViewById(R.id.memo)).getText().toString();
+         airport = (String)airSpinner.getSelectedItem();
+         year = (String)yearsSpinner.getSelectedItem();
+         month = (String)monthsSpinner.getSelectedItem();
+         day = (String)daysSpinner.getSelectedItem();
+
 
 
         if (name.length() > 0) {
             user = FirebaseAuth.getInstance().getCurrentUser();
             PutInfo putInfo = new PutInfo(user.getUid(), name, memo, airport, year, month, day);
+            putInfo.setDateTime(FieldValue.serverTimestamp());
             uploader(putInfo);
         } else {
             startToast("내용을 모두 입력해주세요.");
@@ -151,20 +161,41 @@ public class PutUpActivity extends AppCompatActivity {
 
     private void uploader(PutInfo putInfo){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("puts").add(putInfo)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        startToast("성공적으로 등록하였습니다");
-                        finish();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        startToast("등록에 실패하였습니다.");
-                    }
-                });
+        String id = getIntent().getStringExtra("id");
+        if(id == null){
+            db.collection("puts").add(putInfo)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            startToast("성공적으로 등록하였습니다");
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            startToast("등록에 실패하였습니다.");
+                        }
+                    });
+
+        }else{
+            db.collection("puts").document(id).set(putInfo)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            startToast("게시글을 수정하였습니다");
+                            Intent intent = new Intent(PutUpActivity.this, RequestActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            startToast("게시글 수정에 실패하였습니다.");
+                        }
+                    });
+        }
     }
     private void startToast(String msg){
         Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
@@ -180,6 +211,7 @@ public class PutUpActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.message_btn:
+                Gomessage();
                 return true;
             case R.id.logout_btn:
                 signOut();
@@ -200,6 +232,12 @@ public class PutUpActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
+
+    private void Gomessage() {
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+    }
+
 
 
 }

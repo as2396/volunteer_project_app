@@ -16,9 +16,13 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.volunteer.listener.OnRequestListener;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -40,6 +44,10 @@ public class RequestActivity extends AppCompatActivity {
     private List<PutInfo> PutInfoList;
     private static final String TAG = "RequestActivity";
 
+    private FirebaseFirestore firebaseFirestore;
+    private FirebaseUser user;
+    private String cname;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,48 +61,6 @@ public class RequestActivity extends AppCompatActivity {
         findViewById(R.id.searchButton).setOnClickListener(onClickListener);
         findViewById(R.id.reupButton).setOnClickListener(onClickListener);
 
-        reListView = (ListView) findViewById(R.id.reListView);
-        PutInfoList = new ArrayList<PutInfo>();
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("puts")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                PutInfoList.add(new PutInfo(
-                                        document.getData().get("publisher").toString(),
-                                        document.getData().get("name").toString(),
-                                        document.getData().get("memo").toString(),
-                                        document.getData().get("airport").toString(),
-                                        document.getData().get("year").toString(),
-                                        document.getData().get("month").toString(),
-                                        document.getData().get("day").toString()));
-
-                                adapter = new ReaqestAdapter(getApplicationContext(),PutInfoList);
-                                reListView.setAdapter(adapter);
-
-                                reListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                        Intent intent = new Intent(getApplicationContext(), RequestMoreActivity.class);
-                                        intent.putExtra("name",PutInfoList.get(position).getName());
-                                        intent.putExtra("memo",PutInfoList.get(position).getMemo());
-                                        intent.putExtra("airport",PutInfoList.get(position).getAirport());
-                                        intent.putExtra("year",PutInfoList.get(position).getYear());
-                                        intent.putExtra("month",PutInfoList.get(position).getMonth());
-                                        intent.putExtra("day",PutInfoList.get(position).getDay());
-                                        startActivity(intent);
-                                    }
-                                });
-                            }
-                        } else {
-
-                        }
-                    }
-                });
-
 
         String[] states = {"앨라배마", "알래스카", "애리조나", "아칸소", "캘리포니아", "콜로라도", "코네티컷",
                 "델라웨어", "플로리다", "조지아", "하와이", "아이다호", "일리노이", "인디애나", "아이오와", "캔자스", "켄터키",
@@ -107,6 +73,7 @@ public class RequestActivity extends AppCompatActivity {
         for(int i = 0; i < 49; i++) {
             items.add(states[i]);
         }
+        ListUpdate();
 
         arrayAdapter = new ArrayAdapter<>(getApplicationContext(),
                 R.layout.spinner_item,items);
@@ -129,6 +96,94 @@ public class RequestActivity extends AppCompatActivity {
             }
         }
     };
+
+    OnRequestListener onRequestListener = new OnRequestListener() {
+        @Override
+        public void onDelete(String id,String name) {
+            Log.e("삭제","삭제"+id+name);
+            user = FirebaseAuth.getInstance().getCurrentUser();
+            cname = user.getUid();
+            firebaseFirestore = FirebaseFirestore.getInstance();
+            if(cname.equals(name)) {
+                firebaseFirestore.collection("puts").document(id)
+                        .delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                startToast("게시글을 삭제하였습니다. ");
+                                ListUpdate();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                startToast("게시물을 삭제할 수 없습니다.");
+                            }
+                        });
+            }else{
+                startToast("다른 사용자의 게시물은 삭제할 수 없습니다.");
+            }
+        }
+
+        @Override
+        public void onModify(String id,String name) {
+            user = FirebaseAuth.getInstance().getCurrentUser();
+            cname = user.getUid();
+            if(cname.equals(name)){
+                myStartActivity(PutUpActivity.class,id);
+            }else {
+                startToast("다른 사용자의 게시물은 수정할 수 없습니다.");
+            }
+
+        }
+    };
+
+    public void ListUpdate(){
+        reListView = (ListView) findViewById(R.id.reListView);
+        PutInfoList = new ArrayList<PutInfo>();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("puts").orderBy("dateTime", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                PutInfoList.add(new PutInfo(
+                                        document.getData().get("publisher").toString(),
+                                        document.getData().get("name").toString(),
+                                        document.getData().get("memo").toString(),
+                                        document.getData().get("airport").toString(),
+                                        document.getData().get("year").toString(),
+                                        document.getData().get("month").toString(),
+                                        document.getData().get("day").toString(),
+                                        document.getId()));
+
+                                adapter = new ReaqestAdapter(getApplicationContext(),PutInfoList);
+                                adapter.setOnRequestListener(onRequestListener);
+                                reListView.setAdapter(adapter);
+
+                                reListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        Intent intent = new Intent(RequestActivity.this, RequestMoreActivity.class);
+                                        intent.putExtra("name",PutInfoList.get(position).getName());
+                                        intent.putExtra("memo",PutInfoList.get(position).getMemo());
+                                        intent.putExtra("airport",PutInfoList.get(position).getAirport());
+                                        intent.putExtra("year",PutInfoList.get(position).getYear());
+                                        intent.putExtra("month",PutInfoList.get(position).getMonth());
+                                        intent.putExtra("day",PutInfoList.get(position).getDay());
+                                        intent.putExtra("DestinationUid",PutInfoList.get(position).getPublisher());
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        } else {
+
+                        }
+                    }
+                });
+    }
 
 
     private void searchUp(){
@@ -154,7 +209,8 @@ public class RequestActivity extends AppCompatActivity {
                                         document.getData().get("airport").toString(),
                                         document.getData().get("year").toString(),
                                         document.getData().get("month").toString(),
-                                        document.getData().get("day").toString()));
+                                        document.getData().get("day").toString(),
+                                        document.getId()));
 
                             }
                             if(PutInfoList.isEmpty()){
@@ -184,6 +240,7 @@ public class RequestActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.message_btn:
+                Gomessage();
                 return true;
             case R.id.logout_btn:
                 signOut();
@@ -202,6 +259,17 @@ public class RequestActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    private void Gomessage() {
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+    }
+
+    private void myStartActivity(Class c, String id){
+        Intent intent = new Intent(this,c);
+        intent.putExtra("id",id);
         startActivity(intent);
     }
 }

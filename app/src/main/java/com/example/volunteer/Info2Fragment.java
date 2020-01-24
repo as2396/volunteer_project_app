@@ -1,14 +1,40 @@
 package com.example.volunteer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -60,6 +86,52 @@ public class Info2Fragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+    }
+
+
+    private ListView info2_listView;
+    private Info2Adapter adapter;
+    private List<Info2> Info2List;
+    private FirebaseFirestore firebaseFirestore;
+
+    @Override
+    public void onActivityCreated(Bundle b) {
+        super.onActivityCreated(b);
+
+        info2_listView = (ListView) getView().findViewById(R.id.info2_listView);
+        Info2List = new ArrayList<Info2>();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("info2")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Info2List.add(new Info2(
+                                        document.getData().get("title").toString(),
+                                        document.getData().get("url").toString()));
+
+                                adapter = new Info2Adapter(getContext(),Info2List);
+                                info2_listView.setAdapter(adapter);
+
+                                info2_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        String url = Info2List.get(position).getUrl();
+                                        Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        } else {
+
+                        }
+                    }
+                });
+
+
     }
 
     @Override

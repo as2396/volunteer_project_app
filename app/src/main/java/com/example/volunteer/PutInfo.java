@@ -8,6 +8,19 @@ public class PutInfo {
     private  String year;
     private  String month;
     private  String day;
+    private  String id;
+    private Object DateTime;
+
+    public PutInfo(String publisher, String name, String memo, String airport, String year, String month, String day, String id){
+        this.publisher = publisher;
+        this.name = name;
+        this.memo = memo;
+        this.airport = airport;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.id = id;
+    }
 
     public PutInfo(String publisher, String name, String memo, String airport, String year, String month, String day){
         this.publisher = publisher;
@@ -19,6 +32,13 @@ public class PutInfo {
         this.day = day;
     }
 
+    public String getId() {
+        return this.id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getPublisher(){
         return this.publisher;
@@ -75,5 +95,9 @@ public class PutInfo {
     public void setDay(){
         this.day = day;
     }
+
+    public Object getDateTime() { return  this.DateTime; }
+
+    public void setDateTime(Object datetime) { DateTime = datetime; }
 
 }

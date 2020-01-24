@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group>
+        <item android:id="@+id/notice_btn"
+            android:title="공지사항"/>
+        <item android:id="@+id/put_btn"
+            android:title="이동봉사 신청"/>
+        <item android:id="@+id/request_btn"
+            android:title="이동봉사 요청"/>
+        <item android:id="@+id/message_btn"
+            android:title="쪽지함"/>
+        <item android:id="@+id/logout_btn"
+            android:title="로그아웃"/>
+    </group>
+</menu>

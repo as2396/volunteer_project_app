@@ -6,6 +6,8 @@ public class ReInfo {
     private String memo;
     private String airport;
     private String pet;
+    private String id;
+    private Object DateTime;
 
     public ReInfo(String publisher, String name, String memo, String airport, String pet) {
         this.publisher = publisher;
@@ -13,6 +15,23 @@ public class ReInfo {
         this.memo = memo;
         this.airport = airport;
         this.pet = pet;
+    }
+
+    public ReInfo(String publisher, String name, String memo, String airport, String pet,String id) {
+        this.publisher = publisher;
+        this.name = name;
+        this.memo = memo;
+        this.airport = airport;
+        this.pet = pet;
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getPublisher() {
@@ -54,4 +73,8 @@ public class ReInfo {
     public void setPet(String pet) {
         this.pet = pet;
     }
+
+    public Object getDateTime() { return  this.DateTime; }
+
+    public void setDateTime(Object datetime) { DateTime = datetime; }
 }

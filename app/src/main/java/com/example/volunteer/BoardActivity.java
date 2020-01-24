@@ -31,6 +31,13 @@ public class BoardActivity extends AppCompatActivity {
         final Button info2Button = (Button) findViewById(R.id.info2Button);
         final LinearLayout notice = (LinearLayout)findViewById(R.id.notice);
 
+        notice.setVisibility(View.GONE);
+        infoButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        info2Button.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment, new InfoFragment()).commit();
+
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,6 +75,7 @@ public class BoardActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.message_btn:
+                Gomessage();
                 return true;
             case R.id.logout_btn:
                 signOut();
@@ -86,6 +94,11 @@ public class BoardActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    private void Gomessage() {
+        Intent intent = new Intent(this, MessageActivity.class);
         startActivity(intent);
     }
 }

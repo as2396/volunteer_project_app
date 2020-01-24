@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:id="@+id/app_request_more_toolbar">
+            android:id="@+id/app_put_more_toolbar">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -102,14 +102,13 @@
                 android:textSize="18dp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/put_moreDate"
-                android:layout_width="100dp"
-                android:layout_marginTop="20dp"
-                android:layout_height="match_parent"
+            <ImageView
+                android:id="@+id/pet_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:textSize="15dp"
-                android:textStyle="bold" />
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="20dp" />
 
         </LinearLayout>
 

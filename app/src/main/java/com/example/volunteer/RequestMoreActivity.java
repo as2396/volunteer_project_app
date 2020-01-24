@@ -6,12 +6,18 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 public class RequestMoreActivity extends AppCompatActivity {
+
+    private String DestinationUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,7 @@ public class RequestMoreActivity extends AppCompatActivity {
         TextView airport = (TextView) findViewById(R.id.moreAirport);
         TextView date = (TextView) findViewById(R.id.moreDate);
         TextView memo = (TextView) findViewById(R.id.moreMemo);
+        findViewById(R.id.sendButton).setOnClickListener(onClickListener);
 
         name.setText(intent.getStringExtra("name"));
         airport.setText(intent.getStringExtra("airport"));
@@ -38,7 +45,26 @@ public class RequestMoreActivity extends AppCompatActivity {
         String day = intent.getStringExtra("day");
         String result = year + "-" + month + "-" + day;
         date.setText(result);
+        DestinationUid = intent.getStringExtra("DestinationUid");
+
+        ImageView p_img = (ImageView)findViewById(R.id.p_menu);
+
+
     }
+
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch(v.getId()) {
+                case R.id.sendButton:
+                    Intent intent = new Intent(RequestMoreActivity.this, MessageSending.class);
+                    intent.putExtra("DestinationUid", DestinationUid);
+                    startActivity(intent);
+                    break;
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -50,6 +76,7 @@ public class RequestMoreActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.message_btn:
+                Gomessage();
                 return true;
             case R.id.logout_btn:
                 signOut();
@@ -71,4 +98,8 @@ public class RequestMoreActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void Gomessage() {
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+    }
 }

@@ -115,7 +115,8 @@
             android:id="@+id/reListView"
             android:dividerHeight="10dp"
             android:divider="#ffffff"
-            android:layout_weight="1"></ListView>
+            android:layout_weight="1"
+            android:choiceMode="multipleChoice" ></ListView>
 
         <Button
             android:id="@+id/reupButton"
@@ -132,7 +133,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
-
-
-

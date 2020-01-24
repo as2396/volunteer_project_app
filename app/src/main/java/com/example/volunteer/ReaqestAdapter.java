@@ -2,22 +2,45 @@ package com.example.volunteer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.example.volunteer.listener.OnRequestListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 public class ReaqestAdapter extends BaseAdapter {
 
     private Context context;
     private List<PutInfo> PutInfoList;
+    private FirebaseFirestore firebaseFirestore;
+    private String name;
+    private String id;
+    private OnRequestListener onRequestListener;
+
 
     public ReaqestAdapter(Context context, List<PutInfo> putInfoList) {
         this.context = context;
         PutInfoList = putInfoList;
+        firebaseFirestore = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -36,11 +59,20 @@ public class ReaqestAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View v = View.inflate(context, R.layout.request_item,null);
-        TextView airName = (TextView)v.findViewById(R.id.airName);
-        TextView date = (TextView)v.findViewById(R.id.date);
-        TextView voName = (TextView)v.findViewById(R.id.voName);
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
+        View view = View.inflate(context, R.layout.request_item,null);
+        TextView airName = (TextView)view.findViewById(R.id.airName);
+        TextView date = (TextView)view.findViewById(R.id.date);
+        TextView voName = (TextView)view.findViewById(R.id.voName);
+        ImageView menu_img = (ImageView)view.findViewById(R.id.menu);
+
+        menu_img.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                showPopup(v,position);
+            }
+        });
 
         airName.setText(PutInfoList.get(position).getAirport());
         String year = PutInfoList.get(position).getYear();
@@ -51,8 +83,38 @@ public class ReaqestAdapter extends BaseAdapter {
         voName.setText(PutInfoList.get(position).getName());
 
 
-        v.setTag(PutInfoList.get(position).getAirport());
-        return v;
+        return view;
     }
+
+    public void setOnRequestListener(OnRequestListener onRequestListener){
+        this.onRequestListener = onRequestListener;
+    }
+
+    public void showPopup(View v, final int position) {
+        PopupMenu popup = new PopupMenu(context,v);
+        name = PutInfoList.get(position).getPublisher();
+        id = PutInfoList.get(position).getId();
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.delete_btn:
+                        onRequestListener.onDelete(id,name);
+                        return true;
+
+                    case R.id.update_btn:
+                        onRequestListener.onModify(id,name);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.request_menu,popup.getMenu());
+        popup.show();
+
+    }
+
 
 }

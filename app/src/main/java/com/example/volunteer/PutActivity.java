@@ -16,9 +16,14 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.volunteer.listener.OnPutListener;
+import com.example.volunteer.listener.OnRequestListener;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -38,6 +43,9 @@ public class PutActivity extends AppCompatActivity {
     private PutAdapter adapter;
     private List<ReInfo> ReInfoList;
     private static final String TAG = "RequestActivity";
+    private FirebaseFirestore firebaseFirestore;
+    private FirebaseUser user;
+    private String cname;
 
 
     @Override
@@ -53,43 +61,7 @@ public class PutActivity extends AppCompatActivity {
         findViewById(R.id.put_searchButton).setOnClickListener(onClickListener);
         findViewById(R.id.putupButton).setOnClickListener(onClickListener);
 
-        put_reListView = (ListView) findViewById(R.id.put_reListView);
-        ReInfoList = new ArrayList<ReInfo>();
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("requets")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                ReInfoList.add(new ReInfo(
-                                        document.getData().get("publisher").toString(),
-                                        document.getData().get("name").toString(),
-                                        document.getData().get("memo").toString(),
-                                        document.getData().get("airport").toString(),
-                                        document.getData().get("pet").toString()));
 
-                                adapter = new PutAdapter(getApplicationContext(),ReInfoList);
-                                put_reListView.setAdapter(adapter);
-
-                                put_reListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                        Intent intent = new Intent(getApplicationContext(), PutMoreActivity.class);
-                                        intent.putExtra("name",ReInfoList.get(position).getName());
-                                        intent.putExtra("memo",ReInfoList.get(position).getMemo());
-                                        intent.putExtra("airport",ReInfoList.get(position).getAirport());
-                                        intent.putExtra("year",ReInfoList.get(position).getPet());
-                                        startActivity(intent);
-                                    }
-                                });
-                            }
-                        } else {
-
-                        }
-                    }
-                });
 
         String[] states = {"앨라배마", "알래스카", "애리조나", "아칸소", "캘리포니아", "콜로라도", "코네티컷",
                 "델라웨어", "플로리다", "조지아", "하와이", "아이다호", "일리노이", "인디애나", "아이오와", "캔자스", "켄터키",
@@ -103,12 +75,97 @@ public class PutActivity extends AppCompatActivity {
             items.add(states[i]);
         }
 
+        ListUpdate();
+
         arrayAdapter = new ArrayAdapter<>(getApplicationContext(),
                 R.layout.spinner_item,items);
 
         put_seAirSpinner = (Spinner)findViewById(R.id.put_seAirSpinner);
         put_seAirSpinner.setAdapter(arrayAdapter);
     }
+
+    private void ListUpdate(){
+        put_reListView = (ListView) findViewById(R.id.put_reListView);
+        ReInfoList = new ArrayList<ReInfo>();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("requets").orderBy("dateTime", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                ReInfoList.add(new ReInfo(
+                                        document.getData().get("publisher").toString(),
+                                        document.getData().get("name").toString(),
+                                        document.getData().get("memo").toString(),
+                                        document.getData().get("airport").toString(),
+                                        document.getData().get("pet").toString(),
+                                        document.getId()));
+
+                                adapter = new PutAdapter(getApplicationContext(),ReInfoList);
+                                adapter.setOnPutListener(onPutListener);
+                                put_reListView.setAdapter(adapter);
+
+                                put_reListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        Intent intent = new Intent(getApplicationContext(), PutMoreActivity.class);
+                                        intent.putExtra("name",ReInfoList.get(position).getName());
+                                        intent.putExtra("memo",ReInfoList.get(position).getMemo());
+                                        intent.putExtra("airport",ReInfoList.get(position).getAirport());
+                                        intent.putExtra("pet",ReInfoList.get(position).getPet());
+                                        intent.putExtra("DestinationUid",ReInfoList.get(position).getPublisher());
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        } else {
+
+                        }
+                    }
+                });
+    }
+
+    OnPutListener onPutListener = new OnPutListener() {
+        @Override
+        public void onDelete(String id,String name) {
+            Log.e("삭제","삭제"+id+name);
+            user = FirebaseAuth.getInstance().getCurrentUser();
+            cname = user.getUid();
+            firebaseFirestore = FirebaseFirestore.getInstance();
+            if(cname.equals(name)) {
+                firebaseFirestore.collection("requets").document(id)
+                        .delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                startToast("게시글을 삭제하였습니다. ");
+                                ListUpdate();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                startToast("게시물을 삭제할 수 없습니다.");
+                            }
+                        });
+            }else{
+                startToast("다른 사용자의 게시물은 삭제할 수 없습니다.");
+            }
+        }
+
+        @Override
+        public void onModify(String id,String name) {
+            user = FirebaseAuth.getInstance().getCurrentUser();
+            cname = user.getUid();
+            if(cname.equals(name)){
+                myStartActivity(RequestUpActivity.class,id);
+            }else {
+                startToast("다른 사용자의 게시물은 수정할 수 없습니다.");
+            }
+        }
+    };
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -146,7 +203,8 @@ public class PutActivity extends AppCompatActivity {
                                         document.getData().get("name").toString(),
                                         document.getData().get("memo").toString(),
                                         document.getData().get("airport").toString(),
-                                        document.getData().get("pet").toString()));
+                                        document.getData().get("pet").toString(),
+                                        document.getId()));
 
                             }
                             if(ReInfoList.isEmpty()){
@@ -176,6 +234,7 @@ public class PutActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.message_btn:
+                Gomessage();
                 return true;
             case R.id.logout_btn:
                 signOut();
@@ -186,6 +245,11 @@ public class PutActivity extends AppCompatActivity {
         }
     }
 
+    private void Gomessage() {
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+    }
+
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
     }
@@ -194,6 +258,12 @@ public class PutActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    private void myStartActivity(Class c, String id){
+        Intent intent = new Intent(this,c);
+        intent.putExtra("id",id);
         startActivity(intent);
     }
 }
