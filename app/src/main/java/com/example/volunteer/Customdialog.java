@@ -3,14 +3,12 @@ package com.example.volunteer;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.volunteer.activity.MessageSending;
 import com.example.volunteer.model.SendMsg;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -80,7 +78,7 @@ public class Customdialog extends Dialog {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(),MessageSending.class);
+                Intent intent = new Intent(getContext(), MessageSending.class);
                 intent.putExtra("DestinationUid", sendMsgList.get(position).getDestinationUid());
                 getContext().startActivity(intent);
                 dlg.dismiss();

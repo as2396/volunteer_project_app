@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".PutMoreActivity">
+    tools:context=".activity.PutMoreActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

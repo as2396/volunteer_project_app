@@ -8,8 +8,8 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.volunteer.activity.MessageSending;
 import com.example.volunteer.model.ReceiveMsg;
-import com.example.volunteer.model.SendMsg;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -77,7 +77,7 @@ public class R_Customdialog extends Dialog {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(),MessageSending.class);
+                Intent intent = new Intent(getContext(), MessageSending.class);
                 intent.putExtra("DestinationUid", receiveMsgList.get(position).getSourceUid());
                 getContext().startActivity(intent);
                 dlg.dismiss();
