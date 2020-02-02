@@ -156,8 +156,7 @@ public class RegisterActivity extends AppCompatActivity {
     private boolean checkEmail(String email) {
         return EMAIL_ADDRESS_PATTERN.matcher(email).matches();
     }
-
-
+    
 
     private void startToast(String msg){
         Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
