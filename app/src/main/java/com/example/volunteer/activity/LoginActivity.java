@@ -15,7 +15,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -31,15 +30,10 @@ public class LoginActivity extends AppCompatActivity {
 
         findViewById(R.id.loginButton).setOnClickListener(onClickListener);
         findViewById(R.id.registerButton).setOnClickListener(onClickListener);
-        mAuth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance(); // 인스턴스 초기화
 
     }
 
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-    }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -69,7 +63,6 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                FirebaseUser user = mAuth.getCurrentUser();
                                 startToast("로그인에 성공하였습니다.");
                                 Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 LoginActivity.this.startActivity(loginIntent);

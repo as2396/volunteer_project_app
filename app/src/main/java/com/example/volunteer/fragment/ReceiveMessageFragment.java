@@ -75,11 +75,7 @@ public class ReceiveMessageFragment extends Fragment {
     private List<ReceiveMsg> receiveMsgList;
     private String Uid;
 
-
-    @Override
-    public void onActivityCreated(Bundle b) {
-        super.onActivityCreated(b);
-
+    public void listUpdate(){
         receiver_listview = (ListView) getView().findViewById(R.id.receive_listView);
         receiveMsgList = new ArrayList<ReceiveMsg>();
         Uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -118,6 +114,12 @@ public class ReceiveMessageFragment extends Fragment {
                         }
                     }
                 });
+    }
+    @Override
+    public void onActivityCreated(Bundle b) {
+        super.onActivityCreated(b);
+
+        listUpdate();
     }
 
 

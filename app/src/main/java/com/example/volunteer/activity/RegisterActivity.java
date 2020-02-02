@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
     private String usergender;
-    private boolean validate = false;
     private FirebaseAuth mAuth;
     private static final String TAG = "RegisterActivity";
     @Override
@@ -39,13 +38,6 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         findViewById(R.id.validateButton).setOnClickListener(onClickListener);
         findViewById(R.id.registerButton).setOnClickListener(onClickListener);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -76,13 +68,6 @@ public class RegisterActivity extends AppCompatActivity {
         int genderGroupID = genderGroup.getCheckedRadioButtonId();
         usergender = ((RadioButton)findViewById(genderGroupID)).getText().toString();
 
-        genderGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int i) {
-                RadioButton genderButton = (RadioButton)findViewById(i);
-                usergender = genderButton.getText().toString();
-            }
-        });
 
         if(id.length() > 0 && password.length() >0 && email.length()>0 && address.length()>0 && day.length() >0 && number.length()>0){
 
@@ -91,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 FirebaseUser user1 = FirebaseAuth.getInstance().getCurrentUser();
                                 FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -108,7 +94,6 @@ public class RegisterActivity extends AppCompatActivity {
                                             .addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
-
                                                 }
                                             });
                                 }
@@ -126,7 +111,6 @@ public class RegisterActivity extends AppCompatActivity {
     public  void idCheck(){
         final EditText id = ((EditText)findViewById(R.id.idText));
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseUser user1 = FirebaseAuth.getInstance().getCurrentUser();
         db.collection("users")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -135,14 +119,14 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             boolean checked = true;
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                if(id.length()>0 && checkEmail(id.getText().toString())){
+                                if(id.length() > 0 && checkEmail(id.getText().toString())){
                                     if(id.getText().toString().equals((String)document.getData().get("id"))){
                                         startToast("중복된 아이디입니다.");
                                         checked = false;
                                     }
-                                }
-                                else {
+                                }else {
                                     startToast("이메일 형식이 올바르지 않습니다.");
+                                    checked = false;
                                 }
 
                             }
