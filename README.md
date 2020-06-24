@@ -3,4 +3,6 @@
 
 
 #ScreenShots
-<img src="https://user-images.githubusercontent.com/57715611/85536512-20125c80-b64e-11ea-8150-9e732e1dbd71.png" width="90%"></img>
+
+
+<img src="https://user-images.githubusercontent.com/57715611/85536512-20125c80-b64e-11ea-8150-9e732e1dbd71.png" width="40%"></img>
